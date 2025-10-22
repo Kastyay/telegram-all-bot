@@ -1,34 +1,35 @@
 import os
+import asyncio
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Токен бота
 BOT_TOKEN = '8443886410:AAECQfMTX4wVf0Ax1zkbVoqDbcUtMVTZIQU'
 
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text(
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
         "Привет! Я бот для упоминания всех участников. "
         "Добавьте меня в группу и дайте права администратора, "
         "затем используйте команду /all"
     )
 
-def all_members(update: Update, context: CallbackContext):
+async def all_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
     try:
         # Проверяем, что команда используется в группе
         if update.effective_chat.type not in ['group', 'supergroup']:
-            update.message.reply_text("Эта команда работает только в группах!")
+            await update.message.reply_text("Эта команда работает только в группах!")
             return
         
         # Получаем информацию о чате
-        chat = context.bot.get_chat(chat_id)
-        total_members = chat.get_member_count()
+        chat = await context.bot.get_chat(chat_id)
+        total_members = await chat.get_member_count()
         
-        update.message.reply_text(f"⏳ Собираю список участников ({total_members} человек)...")
+        await update.message.reply_text(f"⏳ Собираю список участников ({total_members} человек)...")
         
-        # Получаем администраторов (самый простой способ получить список участников)
-        administrators = context.bot.get_chat_administrators(chat_id)
+        # Получаем администраторов
+        administrators = await context.bot.get_chat_administrators(chat_id)
         
         # Формируем список упоминаний
         mentions = []
@@ -48,28 +49,26 @@ def all_members(update: Update, context: CallbackContext):
                 # Если сообщение слишком длинное, разбиваем на части
                 parts = [message[i:i+4096] for i in range(0, len(message), 4096)]
                 for part in parts:
-                    update.message.reply_text(part, parse_mode='Markdown')
+                    await update.message.reply_text(part, parse_mode='Markdown')
             else:
-                update.message.reply_text(message, parse_mode='Markdown')
+                await update.message.reply_text(message, parse_mode='Markdown')
         else:
-            update.message.reply_text("📢 Внимание всем! @all")
+            await update.message.reply_text("📢 Внимание всем! @all")
             
     except Exception as e:
-        update.message.reply_text(f"Ошибка! Убедитесь, что бот является администратором группы. Детали: {str(e)}")
+        await update.message.reply_text(f"Ошибка! Убедитесь, что бот является администратором группы. Детали: {str(e)}")
 
-def main():
-    # Создаем updater и dispatcher
-    updater = Updater(BOT_TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
+async def main():
+    # Создаем Application
+    application = Application.builder().token(BOT_TOKEN).build()
     
     # Добавляем обработчики команд
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("all", all_members))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("all", all_members))
     
     # Запускаем бота
     print("Бот запущен...")
-    updater.start_polling()
-    updater.idle()
+    await application.run_polling()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
