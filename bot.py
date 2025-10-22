@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Получаем токен из переменных окружения
-BOT_TOKEN = os.environ.get('8443886410:AAECQfMTX4wVf0Ax1zkbVoqDbcUtMVTZIQU')
+BOT_TOKEN = '8443886410:AAECQfMTX4wVf0Ax1zkbVoqDbcUtMVTZIQU'
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -72,4 +72,5 @@ def main():
     application.run_polling()
 
 if __name__ == '__main__':
+
     main()
