@@ -36,7 +36,7 @@ def all_admins(message):
         
         if admin_mentions:
             # Собираем сообщение
-            response = "👥 Администраторы группы:\n" + " ".join(admin_mentions)
+            response = "Тегаю всех\n" + " ".join(admin_mentions)
             bot.send_message(chat_id, response, parse_mode='HTML')
         else:
             bot.reply_to(message, "❌ Не удалось найти администраторов")
@@ -47,5 +47,6 @@ def all_admins(message):
             error_msg += "\n\nУбедитесь, что бот является администратором группы!"
         bot.reply_to(message, error_msg)
 
-print("✅ Бот запущен и готов тегать администраторов!")
+print("✅ Бот запущен!")
 bot.polling(none_stop=True)
+
